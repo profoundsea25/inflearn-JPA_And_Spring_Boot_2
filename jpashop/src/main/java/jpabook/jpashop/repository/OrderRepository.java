@@ -27,6 +27,11 @@ public class OrderRepository {
         return em.find(Order.class, id);
     }
 
+    public List<Order> findAll() {
+        return em.createQuery("select o from Order o", Order.class)
+                .getResultList();
+    }
+
     // # 동적 쿼리를 만드는 방법들
     // 1. 가장 무식한 방법
     public List<Order> findAllByString(OrderSearch orderSearch) {
@@ -100,11 +105,19 @@ public class OrderRepository {
     // 동적 쿼리 3. Querydsl
     public List<Order> findAll(OrderSearch orderSearch) {
         return em.createQuery("select o from Order o join o.member m" +
-                        "where o.status = :status" +
-                        "and m.name like :name", Order.class)
+                        " where o.status = :status" +
+                        " and m.name like :name", Order.class)
                 .setParameter("status", orderSearch.getOrderStatus())
                 .setParameter("name", orderSearch.getMemberName())
                 .setMaxResults(1000) // 최대 1000건
+                .getResultList();
+    }
+
+    public List<Order> findAllWithMemberDelivery() {
+        return em.createQuery(
+                "select o from Order o" +
+                        " join fetch o.member m" +
+                        " join fetch o.delivery d", Order.class)
                 .getResultList();
     }
 }
